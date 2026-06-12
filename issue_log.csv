@@ -1,20 +1,20 @@
-Date,Time,EngineerName,ItemCode,ItemName,QuantityTaken,QuantityLeft
-09-06-2026,11:53:23,Dnyaneshwar Gavali,PT001,Rosemount 3051 Pressure Transmitter,10,1
-09-06-2026,12:06:15,Dnyaneshwar Gavali,PT001,Rosemount 3051 Pressure Transmitter,5,6
-09-06-2026,12:20:27,Samarth Gavali,PT001,Rosemount 3051 Pressure Transmitter,10,1
-09-06-2026,12:26:53,Nitin Phadtare,PT001,Rosemount 3051 Pressure Transmitter,6,5
-09-06-2026,14:26:30,Samarth Gavali,PS001,Danfoss Pressure Switch,1,2
-09-06-2026,15:30:27,samarth gavali,PT001,Rosemount 3051 Pressure Transmitter,3,2
-09-06-2026,15:31:34,samarth gavali,TT001,Pt100 RTD Sensor,3,22
-09-06-2026,15:33:19,samarth gavali,LT001,Magnetrol Level Transmitter,3,9
-09-06-2026,15:33:58,samarth gavali,PT002,Yokogawa EJA110E,9,6
-09-06-2026,15:40:07,Samarth Gavali,PT001,Rosemount 3051 Pressure Transmitter,5,0
-09-06-2026,15:42:06,Samarth Gavali,PT001,Rosemount 3051 Pressure Transmitter,2,0
-09-06-2026,15:49:02,Samarth Gavali,TT001,Pt100 RTD Sensor,13,9
-11-06-2026,12:17:18,Samarth Gavali,LT001,Magnetrol Level Transmitter,3,9
-11-06-2026,12:17:44,Samarth Gavali,LT001,Magnetrol Level Transmitter,3,6
-11-06-2026,12:24:49,Nitin Phadtare,LT001,Magnetrol Level Transmitter,3,7
-11-06-2026,12:36:02,Samarth Gavali,TT001,Pt100 RTD Sensor,2,23
-11-06-2026,12:37:27,Samarth Gavali,TT001,Pt100 RTD Sensor,2,21
-11-06-2026,12:37:50,Samarth Gavali,PT001,Rosemount 3051 Pressure Transmitter,2,98
-11-06-2026,12:39:41,Samarth Gavali,PT001,Rosemount 3051 Pressure Transmitter,1,97
+Date,Time,EngineerName,Department,ItemCode,ItemName,QuantityTaken,QuantityLeft
+09-06-2026,11:53:23,Dnyaneshwar Gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,10,1
+09-06-2026,12:06:15,Dnyaneshwar Gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,5,6
+09-06-2026,12:20:27,Samarth Gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,10,1
+09-06-2026,12:26:53,Nitin Phadtare,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,6,5
+09-06-2026,14:26:30,Samarth Gavali,Not Specified,PS001,Danfoss Pressure Switch,1,2
+09-06-2026,15:30:27,samarth gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,3,2
+09-06-2026,15:31:34,samarth gavali,Not Specified,TT001,Pt100 RTD Sensor,3,22
+09-06-2026,15:33:19,samarth gavali,Not Specified,LT001,Magnetrol Level Transmitter,3,9
+09-06-2026,15:33:58,samarth gavali,Not Specified,PT002,Yokogawa EJA110E,9,6
+09-06-2026,15:40:07,Samarth Gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,5,0
+09-06-2026,15:42:06,Samarth Gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,2,0
+09-06-2026,15:49:02,Samarth Gavali,Not Specified,TT001,Pt100 RTD Sensor,13,9
+11-06-2026,12:17:18,Samarth Gavali,Not Specified,LT001,Magnetrol Level Transmitter,3,9
+11-06-2026,12:17:44,Samarth Gavali,Not Specified,LT001,Magnetrol Level Transmitter,3,6
+11-06-2026,12:24:49,Nitin Phadtare,Not Specified,LT001,Magnetrol Level Transmitter,3,7
+11-06-2026,12:36:02,Samarth Gavali,Not Specified,TT001,Pt100 RTD Sensor,2,23
+11-06-2026,12:37:27,Samarth Gavali,Not Specified,TT001,Pt100 RTD Sensor,2,21
+11-06-2026,12:37:50,Samarth Gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,2,98
+11-06-2026,12:39:41,Samarth Gavali,Not Specified,PT001,Rosemount 3051 Pressure Transmitter,1,97
