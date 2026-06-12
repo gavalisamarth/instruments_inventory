@@ -207,6 +207,9 @@ header, [data-testid="stHeader"] { background: transparent !important; }
 .main .block-container { padding:0 !important; margin:0 !important; max-width:100% !important; }
 [data-testid="stHorizontalBlock"] { gap:0 !important; }
 
+/* ── Hide Form Input Instructions (prevents overlapping) ── */
+div[data-testid="InputInstructions"] { display: none !important; }
+
 /* ══════════════════════════════
    SIDEBAR COLUMN
 ══════════════════════════════ */
