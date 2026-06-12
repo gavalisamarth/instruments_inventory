@@ -25,6 +25,23 @@ from inventory_chatbot_copy import (
     load_inventory, save_inventory, log_issue,
     INVENTORY_FILE, LOG_FILE_PATH, LOG_EXCEL_PATH
 )
+
+# ── User Database ─────────────────────────────────────────────────────────────
+USERS_CSV_PATH = os.path.join(SCRIPT_DIR, "users.csv")
+
+def load_users():
+    if not os.path.exists(USERS_CSV_PATH):
+        df = pd.DataFrame(columns=["Name", "Email", "Department", "Password"])
+        df.to_csv(USERS_CSV_PATH, index=False)
+        return df
+    return pd.read_csv(USERS_CSV_PATH)
+
+def save_user(name, email, dept, password):
+    df = load_users()
+    new_user = pd.DataFrame([{"Name": name, "Email": email, "Department": dept, "Password": password}])
+    df = pd.concat([df, new_user], ignore_index=True)
+    df.to_csv(USERS_CSV_PATH, index=False)
+
 try:
     import analytics as anlx
     ANALYTICS_READY = True
@@ -48,6 +65,9 @@ st.set_page_config(
 
 # ── Session state ─────────────────────────────────────────────────────────────
 if "active_page" not in st.session_state: st.session_state.active_page = "dashboard"
+if "authenticated" not in st.session_state: st.session_state.authenticated = False
+if "user_name" not in st.session_state: st.session_state.user_name = ""
+if "user_dept" not in st.session_state: st.session_state.user_dept = ""
 
 PAGE = st.session_state.active_page
 
@@ -557,6 +577,53 @@ hr { border-color: var(--border) !important; margin: 10px 0 !important; }
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+# AUTHENTICATION WALL
+# ═════════════════════════════════════════════════════════════════════════════
+if not st.session_state.authenticated:
+    st.markdown("<h2 style='text-align: center; color: var(--teal); margin-top:50px;'>ADANI STORE TERMINAL</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color: var(--text-3); font-size: 0.9rem;'>Please log in to continue</p>", unsafe_allow_html=True)
+    
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        auth_mode = st.radio("Mode", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
+        
+        if auth_mode == "Login":
+            with st.form("login_form"):
+                email = st.text_input("Email")
+                password = st.text_input("Password", type="password")
+                submit = st.form_submit_button("LOGIN", use_container_width=True)
+                if submit:
+                    users_df = load_users()
+                    match = users_df[(users_df["Email"] == email) & (users_df["Password"] == password)]
+                    if not match.empty:
+                        user_info = match.iloc[0]
+                        st.session_state.authenticated = True
+                        st.session_state.user_name = user_info["Name"]
+                        st.session_state.user_dept = user_info["Department"]
+                        st.rerun()
+                    else:
+                        st.error("Invalid email or password.")
+        else:
+            with st.form("register_form"):
+                name = st.text_input("Full Name")
+                dept = st.text_input("Department")
+                email = st.text_input("Email")
+                password = st.text_input("Password", type="password")
+                submit = st.form_submit_button("REGISTER", use_container_width=True)
+                if submit:
+                    if name and email and password:
+                        users_df = load_users()
+                        if email in users_df["Email"].values:
+                            st.error("Email already registered.")
+                        else:
+                            save_user(name, email, dept, password)
+                            st.success("Registered successfully! Please log in.")
+                    else:
+                        st.error("Please fill all required fields.")
+    st.stop()
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 # LAYOUT
 # ═════════════════════════════════════════════════════════════════════════════
 NAV_ITEMS = [
@@ -626,6 +693,11 @@ with st.sidebar:
     st.markdown("<div class='reload-btn'>", unsafe_allow_html=True)
     if st.button("🔄 RELOAD DATA", key="reload", use_container_width=True):
         st.cache_data.clear()
+        st.rerun()
+    if st.button("🚪 LOG OUT", key="logout", use_container_width=True):
+        st.session_state.authenticated = False
+        st.session_state.user_name = ""
+        st.session_state.user_dept = ""
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -766,12 +838,12 @@ with st.container():
         left, right = st.columns([1,1], gap="large")
         with left:
             st.markdown("<div class='sec-hdr'><span class='sec-hdr-left'>ENGINEER DETAILS</span></div>", unsafe_allow_html=True)
-            engineer_name = st.text_input("Full Name *", placeholder="e.g. Rahul Sharma")
+            engineer_name = st.text_input("Full Name *", value=st.session_state.user_name)
             emp_id        = st.text_input("Employee ID", placeholder="e.g. AD-CI-1042")
-            department    = st.selectbox("Department", [
-                "C&I", "Mechanical", "Electrical", "Operations",
-                "Maintenance", "Safety", "Civil", "IT", "Other"
-            ])
+            
+            dept_options = ["C&I", "Mechanical", "Electrical", "Operations", "Maintenance", "Safety", "Civil", "IT", "Other"]
+            default_index = dept_options.index(st.session_state.user_dept) if st.session_state.user_dept in dept_options else 0
+            department    = st.selectbox("Department", dept_options, index=default_index)
 
             st.markdown("<div class='sec-hdr'><span class='sec-hdr-left'>INSTRUMENT SELECTION</span></div>", unsafe_allow_html=True)
             hint = st.text_input("Filter list", placeholder="type to narrow...", key="isearch")
