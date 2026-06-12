@@ -108,7 +108,7 @@ def get_inventory_fresh():
 df     = get_inventory()
 log_df = get_log()
 if df is None:
-    st.error("⚠️ Cannot load plant_inventory.xlsx"); st.stop()
+    st.error("⚠️ Cannot load inventory from Supabase"); st.stop()
 
 low_df    = df[df["Quantity"] < df["MinStock"]]
 low_count = len(low_df)

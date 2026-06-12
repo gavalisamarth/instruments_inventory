@@ -52,10 +52,11 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 import toml
 from supabase import create_client
+import streamlit as st
 
 def get_supabase():
-    secrets = toml.load(os.path.join(SCRIPT_DIR, ".streamlit", "secrets.toml"))
-    return create_client(secrets["supabase"]["url"], secrets["supabase"]["key"])
+    # Use Streamlit's built-in secrets manager (works locally AND on the cloud)
+    return create_client(st.secrets["supabase"]["url"], st.secrets["supabase"]["key"])
 
 
 # =============================================================================
