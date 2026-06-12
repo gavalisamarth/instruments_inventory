@@ -50,12 +50,16 @@ def _fig(w=9, h=4):
 # DATA LOADER
 # =============================================================================
 
-def load_log(log_path):
-    """Load issue_log.csv and return cleaned DataFrame."""
-    if not os.path.exists(log_path):
-        return pd.DataFrame()
+from inventory_chatbot_copy import get_supabase
+
+def load_log():
+    """Load transaction logs from Supabase and return cleaned DataFrame."""
     try:
-        df = pd.read_csv(log_path)
+        supabase = get_supabase()
+        response = supabase.table("transaction_logs").select("*").execute()
+        df = pd.DataFrame(response.data)
+        if df.empty:
+            return pd.DataFrame()
         df.columns = df.columns.str.strip()
 
         # Parse date

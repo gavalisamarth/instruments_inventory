@@ -50,12 +50,12 @@ except ImportError:
 # Folder where this script lives
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Inventory Excel file — seniors update this from SAP
-INVENTORY_FILE  = os.path.join(SCRIPT_DIR, "plant_inventory.xlsx")
-INVENTORY_SHEET = "Inventory"
+import toml
+from supabase import create_client
 
-# Transaction log — auto-created, do not edit manually
-LOG_FILE_PATH = os.path.join(SCRIPT_DIR, "issue_log.csv")
+def get_supabase():
+    secrets = toml.load(os.path.join(SCRIPT_DIR, ".streamlit", "secrets.toml"))
+    return create_client(secrets["supabase"]["url"], secrets["supabase"]["key"])
 
 
 # =============================================================================
@@ -64,35 +64,16 @@ LOG_FILE_PATH = os.path.join(SCRIPT_DIR, "issue_log.csv")
 # =============================================================================
 
 def load_inventory():
-    """
-    Loads inventory data from plant_inventory.xlsx.
-    Returns a DataFrame, or None if the file is missing or broken.
-    """
-
-    if not os.path.exists(INVENTORY_FILE):
-        print("\n[ERROR] plant_inventory.xlsx not found!")
-        print(f"   Expected location: {INVENTORY_FILE}")
-        print("   Ask seniors to place the updated Excel file in this folder.")
-        return None
-
     try:
-        df = pd.read_excel(INVENTORY_FILE, sheet_name=INVENTORY_SHEET)
-
-        # Clean column names (remove accidental spaces)
-        df.columns = df.columns.str.strip()
-
-        # Clean string values in all columns
-        df = df.apply(lambda col: col.str.strip() if col.dtype == "object" else col)
-
-        # Drop completely empty rows (seniors may leave blank rows)
-        df = df.dropna(subset=["ItemCode", "ItemName"])
-        df = df.reset_index(drop=True)
-
-        print(f"\n[OK] Inventory loaded: {len(df)} items from plant_inventory.xlsx\n")
+        supabase = get_supabase()
+        response = supabase.table("inventory").select("*").execute()
+        df = pd.DataFrame(response.data)
+        if df.empty:
+            df = pd.DataFrame(columns=["ItemCode", "ItemName", "Category", "Quantity", "MinStock", "Location"])
+        print(f"\n[OK] Inventory loaded: {len(df)} items from Supabase\n")
         return df
-
     except Exception as error:
-        print(f"\n[ERROR] Could not load inventory: {error}")
+        print(f"\n[ERROR] Could not load inventory from Supabase: {error}")
         return None
 
 
@@ -102,27 +83,13 @@ def load_inventory():
 # Preserves all other sheets (Instructions, Column Guide)
 # =============================================================================
 
-def save_inventory(df):
-    """
-    Saves the updated inventory DataFrame back to plant_inventory.xlsx.
-    Only the Inventory sheet is replaced. Other sheets are untouched.
-
-    Returns True if saved successfully, False if failed.
-    """
+def save_inventory(item_code, new_qty):
     try:
-        with pd.ExcelWriter(
-            INVENTORY_FILE,
-            engine          = "openpyxl",
-            mode            = "a",           # Append mode — don't destroy other sheets
-            if_sheet_exists = "replace"      # Only replace the Inventory sheet
-        ) as writer:
-            df.to_excel(writer, sheet_name=INVENTORY_SHEET, index=False)
-
+        supabase = get_supabase()
+        supabase.table("inventory").update({"Quantity": new_qty}).eq("ItemCode", item_code).execute()
         return True
-
     except Exception as error:
-        print(f"\n[ERROR] Could not save to plant_inventory.xlsx: {error}")
-        print("   Make sure the file is not currently open in Excel.")
+        print(f"\n[ERROR] Could not save to Supabase: {error}")
         return False
 
 
@@ -138,17 +105,7 @@ LOG_SHEET      = "Transaction Log"
 
 
 def log_issue(engineer_name, item_code, item_name, qty_taken, qty_remaining, department=""):
-    """
-    Records every instrument issue to BOTH:
-      1. issue_log.csv  - simple backup, always available
-      2. issue_log.xlsx - rich Excel with 3 analysis sheets
-
-    Columns: Date, Time, EngineerName, Department, ItemCode, ItemName,
-             QuantityTaken, QuantityLeft
-    """
-
     now = datetime.datetime.now()
-
     log_entry = {
         "Date"          : now.strftime("%d-%m-%Y"),
         "Time"          : now.strftime("%H:%M:%S"),
@@ -159,54 +116,11 @@ def log_issue(engineer_name, item_code, item_name, qty_taken, qty_remaining, dep
         "QuantityTaken" : qty_taken,
         "QuantityLeft"  : qty_remaining
     }
-
-    new_row = pd.DataFrame([log_entry])
-
-    # ----------------------------------------------------------------
-    # Write to CSV (simple, fast, always works)
-    # ----------------------------------------------------------------
-    file_exists = os.path.exists(LOG_FILE_PATH)
-    new_row.to_csv(
-        LOG_FILE_PATH,
-        mode   = "a",
-        index  = False,
-        header = not file_exists
-    )
-
-    # ----------------------------------------------------------------
-    # Write to Excel log (rich, with summary sheets)
-    # Reads existing log, appends new row, rebuilds all 3 sheets
-    # ----------------------------------------------------------------
     try:
-        # Load existing log or start fresh
-        if os.path.exists(LOG_EXCEL_PATH):
-            existing = pd.read_excel(LOG_EXCEL_PATH, sheet_name=LOG_SHEET)
-            full_log = pd.concat([existing, new_row], ignore_index=True)
-        else:
-            full_log = new_row
-
-        # Build summary by engineer
-        eng_summary = full_log.groupby("EngineerName").agg(
-            Total_Issues    = ("QuantityTaken", "count"),
-            Total_Qty_Taken = ("QuantityTaken", "sum")
-        ).reset_index().sort_values("Total_Qty_Taken", ascending=False)
-
-        # Build summary by item
-        item_summary = full_log.groupby(["ItemCode", "ItemName"]).agg(
-            Times_Issued = ("QuantityTaken", "count"),
-            Total_Taken  = ("QuantityTaken", "sum")
-        ).reset_index().sort_values("Total_Taken", ascending=False)
-
-        # Write all 3 sheets to Excel
-        with pd.ExcelWriter(LOG_EXCEL_PATH, engine="openpyxl") as writer:
-            full_log.to_excel(    writer, sheet_name="Transaction Log", index=False)
-            eng_summary.to_excel( writer, sheet_name="By Engineer",     index=False)
-            item_summary.to_excel(writer, sheet_name="By Item",         index=False)
-
+        supabase = get_supabase()
+        supabase.table("transaction_logs").insert(log_entry).execute()
     except Exception as e:
-        # Excel log failure should never crash the main program
-        print(f"  [WARNING] Could not update issue_log.xlsx: {e}")
-        print("  CSV log was still saved successfully.")
+        print(f"  [WARNING] Could not update Supabase logs: {e}")
 
 
 

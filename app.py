@@ -23,24 +23,35 @@ LOGO_B64 = _load_logo_b64()
 
 from inventory_chatbot_copy import (
     load_inventory, save_inventory, log_issue,
-    INVENTORY_FILE, LOG_FILE_PATH, LOG_EXCEL_PATH
+    get_supabase
 )
 
 # ── User Database ─────────────────────────────────────────────────────────────
-USERS_CSV_PATH = os.path.join(SCRIPT_DIR, "users.csv")
-
 def load_users():
-    if not os.path.exists(USERS_CSV_PATH):
-        df = pd.DataFrame(columns=["Name", "Email", "Department", "Password"])
-        df.to_csv(USERS_CSV_PATH, index=False)
+    try:
+        supabase = get_supabase()
+        response = supabase.table("users").select("*").execute()
+        df = pd.DataFrame(response.data)
+        if df.empty:
+            df = pd.DataFrame(columns=["Name", "Email", "Department", "Password"])
         return df
-    return pd.read_csv(USERS_CSV_PATH)
+    except Exception as e:
+        st.error(f"Cannot read users from Supabase: {e}")
+        return pd.DataFrame(columns=["Name", "Email", "Department", "Password"])
 
 def save_user(name, email, dept, password):
-    df = load_users()
-    new_user = pd.DataFrame([{"Name": name, "Email": email, "Department": dept, "Password": password}])
-    df = pd.concat([df, new_user], ignore_index=True)
-    df.to_csv(USERS_CSV_PATH, index=False)
+    try:
+        supabase = get_supabase()
+        supabase.table("users").insert({
+            "Name": name, 
+            "Email": email, 
+            "Department": dept, 
+            "Password": password
+        }).execute()
+        return True
+    except Exception as e:
+        st.error(f"Registration failed! Could not save to Supabase: {e}")
+        return False
 
 try:
     import analytics as anlx
@@ -81,22 +92,18 @@ def get_inventory(_mtime=0): return load_inventory()
 
 @st.cache_data(ttl=5)
 def get_log():
-    if os.path.exists(LOG_FILE_PATH):
-        try:
-            return pd.read_csv(LOG_FILE_PATH)
-        except Exception as e:
-            st.error(f"Error reading log file: {e}")
-    else:
-        st.error(f"Log file not found at: {LOG_FILE_PATH}")
-    return pd.DataFrame()
+    try:
+        supabase = get_supabase()
+        response = supabase.table("transaction_logs").select("*").execute()
+        df = pd.DataFrame(response.data)
+        return df
+    except Exception as e:
+        st.error(f"Error reading log from Supabase: {e}")
+        return pd.DataFrame()
 
 def get_inventory_fresh():
-    """Always reads Excel — bypasses cache. Used after manual edits."""
-    try:
-        mtime = os.path.getmtime(INVENTORY_FILE)
-    except:
-        mtime = 0
-    return get_inventory(_mtime=mtime)
+    """Always reads Supabase — bypasses cache. Used after manual edits."""
+    return get_inventory(_mtime=datetime.datetime.now().timestamp())
 
 df     = get_inventory()
 log_df = get_log()
@@ -619,8 +626,9 @@ if not st.session_state.authenticated:
                         if email in users_df["Email"].values:
                             st.error("Email already registered.")
                         else:
-                            save_user(name, email, dept, password)
-                            st.success("Registered successfully! Please log in.")
+                            success = save_user(name, email, dept, password)
+                            if success:
+                                st.success("Registered successfully! Please log in.")
                     else:
                         st.error("Please fill all required fields.")
     st.stop()
@@ -913,8 +921,8 @@ with st.container():
                     st.markdown(f"<div class='alert err'>✕  Only {cur} units available.</div>", unsafe_allow_html=True)
                 else:
                     new_qty = cur - qty_req
-                    df.loc[idx,"Quantity"] = new_qty
-                    if save_inventory(df):
+                    if save_inventory(s["ItemCode"], new_qty):
+                        df.loc[idx,"Quantity"] = new_qty
                         log_issue(engineer_name.strip(), s["ItemCode"], s["ItemName"],
                                   qty_req, new_qty, department=department)
                         st.cache_data.clear()
@@ -1041,7 +1049,7 @@ with st.container():
             st.markdown("<div class='alert err'>✕  Analytics module not loaded. Check analytics.py.</div>",
                         unsafe_allow_html=True)
         else:
-            adf = anlx.load_log(LOG_FILE_PATH)
+            adf = anlx.load_log()
 
             if adf.empty:
                 st.markdown("<div class='alert info'>No transaction data yet. Issue instruments first — analytics will appear here.</div>",
