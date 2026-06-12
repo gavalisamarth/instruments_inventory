@@ -62,8 +62,12 @@ def get_inventory(_mtime=0): return load_inventory()
 @st.cache_data(ttl=5)
 def get_log():
     if os.path.exists(LOG_FILE_PATH):
-        try: return pd.read_csv(LOG_FILE_PATH)
-        except: pass
+        try:
+            return pd.read_csv(LOG_FILE_PATH)
+        except Exception as e:
+            st.error(f"Error reading log file: {e}")
+    else:
+        st.error(f"Log file not found at: {LOG_FILE_PATH}")
     return pd.DataFrame()
 
 def get_inventory_fresh():
