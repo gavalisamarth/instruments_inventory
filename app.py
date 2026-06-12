@@ -535,12 +535,25 @@ hr { border-color: var(--border) !important; margin: 10px 0 !important; }
     [data-testid="stHorizontalBlock"] { flex-direction: column !important; }
     [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child {
         position: relative !important;
-        min-height: auto !important;
+        height: auto !important;
+        min-height: 0 !important;
         max-height: none !important;
         width: 100% !important;
         border-right: none !important;
         border-bottom: 1px solid var(--border) !important;
         padding-bottom: 15px !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    /* Remove gaps and force compact buttons */
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child [data-testid="stVerticalBlock"] {
+        gap: 4px !important;
+        height: auto !important;
+    }
+    
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child .stButton > button {
+        width: 100% !important;
     }
     
     /* Content padding and width */
@@ -608,7 +621,7 @@ with sb:
     # New Issue CTA
     st.markdown("<div style='padding:10px 0 4px;'>", unsafe_allow_html=True)
     st.markdown("<div class='new-issue-btn'>", unsafe_allow_html=True)
-    if st.button("➕ NEW ISSUE", key="new_issue_cta"):
+    if st.button("➕ NEW ISSUE", key="new_issue_cta", use_container_width=True):
         st.session_state.active_page = "issue"
         st.rerun()
     st.markdown("</div></div>", unsafe_allow_html=True)
@@ -620,7 +633,7 @@ with sb:
         is_active = PAGE == key
         wrap = "nav-active nav-item" if is_active else "nav-item"
         st.markdown(f"<div class='{wrap}'>", unsafe_allow_html=True)
-        if st.button(label, key=f"nav_{key}"):
+        if st.button(label, key=f"nav_{key}", use_container_width=True):
             st.session_state.active_page = key
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
@@ -635,7 +648,7 @@ with sb:
         </div>
     </div>""", unsafe_allow_html=True)
     st.markdown("<div class='reload-btn'>", unsafe_allow_html=True)
-    if st.button("🔄 RELOAD DATA", key="reload"):
+    if st.button("🔄 RELOAD DATA", key="reload", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
@@ -834,7 +847,7 @@ with main:
         st.markdown("<div class='submit-btn'>", unsafe_allow_html=True)
         bc,_ = st.columns([1,2])
         with bc:
-            submit = st.button("▲  CONFIRM & ISSUE INSTRUMENT", type="primary")
+            submit = st.button("▲  CONFIRM & ISSUE INSTRUMENT", type="primary", use_container_width=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
         if submit:
