@@ -582,6 +582,11 @@ hr { border-color: var(--border) !important; margin: 10px 0 !important; }
         opacity: 0.7 !important;
     }
 }
+
+/* Center radio buttons on login screen */
+div.row-widget.stRadio > div[role="radiogroup"] {
+    justify-content: center !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -592,8 +597,8 @@ hr { border-color: var(--border) !important; margin: 10px 0 !important; }
 if not st.session_state.authenticated:
     col1, col2, col3 = st.columns([1,2,1])
     with col2:
-        st.markdown("<h2 style='color: var(--teal); margin-top:30px; margin-bottom: 5px; letter-spacing: -0.5px;'>ADANI STORE TERMINAL</h2>", unsafe_allow_html=True)
-        st.markdown("<p style='color: var(--text-3); font-size: 0.95rem; margin-top: 0; margin-bottom: 20px;'>Please log in to continue</p>", unsafe_allow_html=True)
+        st.markdown("<h2 style='text-align: center; color: var(--teal); margin-top:30px; margin-bottom: 5px; letter-spacing: -0.5px;'>ADANI STORE TERMINAL</h2>", unsafe_allow_html=True)
+        st.markdown("<p style='text-align: center; color: var(--text-3); font-size: 0.95rem; margin-top: 0; margin-bottom: 20px;'>Please log in to continue</p>", unsafe_allow_html=True)
         
         auth_mode = st.radio("Mode", ["Login", "Register"], horizontal=True, label_visibility="collapsed")
         
