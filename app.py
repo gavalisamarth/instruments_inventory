@@ -527,6 +527,40 @@ input:focus, textarea:focus { border-color: var(--teal) !important; }
 }
 
 hr { border-color: var(--border) !important; margin: 10px 0 !important; }
+/* ══════════════════════════════
+   MOBILE OPTIMIZATION
+══════════════════════════════ */
+@media (max-width: 768px) {
+    /* Stack sidebar naturally instead of 100vh sticky */
+    [data-testid="stHorizontalBlock"] { flex-direction: column !important; }
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child {
+        position: relative !important;
+        min-height: auto !important;
+        max-height: none !important;
+        width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid var(--border) !important;
+        padding-bottom: 15px !important;
+    }
+    
+    /* Content padding and width */
+    [data-testid="stHorizontalBlock"] > [data-testid="column"]:last-child {
+        min-height: auto !important;
+        width: 100% !important;
+    }
+    .content-pad { padding: 16px 12px !important; }
+    
+    /* Stack KPI Cards */
+    .kpi-row { flex-direction: column !important; gap: 10px !important; }
+    
+    /* Make tables horizontally scrollable */
+    .tbl-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+    
+    /* Adjust top bar */
+    .top-bar { padding: 0 15px !important; }
+    .top-bar-title { font-size: 0.65rem !important; }
+    .top-bar-page { font-size: 0.65rem !important; }
+}
 </style>
 """, unsafe_allow_html=True)
 
