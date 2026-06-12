@@ -170,6 +170,19 @@ st.markdown("""
 #MainMenu, footer { display:none !important; }
 header, [data-testid="stHeader"] { background: transparent !important; }
 
+/* ── Custom Hamburger Menu Icon ── */
+[data-testid="collapsedControl"] svg {
+    display: none !important;
+}
+[data-testid="collapsedControl"]::after {
+    content: '☰' !important;
+    font-size: 1.6rem !important;
+    color: var(--teal) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
 /* ── Remove block padding ── */
 .main .block-container { padding:0 !important; margin:0 !important; max-width:100% !important; }
 [data-testid="stHorizontalBlock"] { gap:0 !important; }
@@ -517,6 +530,28 @@ input:focus, textarea:focus { border-color: var(--teal) !important; }
 
 hr { border-color: var(--border) !important; margin: 10px 0 !important; }
 
+/* ══════════════════════════════
+   MOBILE OPTIMIZATION
+══════════════════════════════ */
+@media (max-width: 768px) {
+    .top-bar {
+        flex-direction: column !important;
+        height: auto !important;
+        align-items: flex-start !important;
+        padding: 12px 20px !important;
+        gap: 6px !important;
+    }
+    .top-bar-left {
+        flex-wrap: wrap !important;
+    }
+    .top-bar-title {
+        font-size: 0.65rem !important;
+    }
+    .top-bar-right {
+        font-size: 0.6rem !important;
+        opacity: 0.7 !important;
+    }
+}
 </style>
 """, unsafe_allow_html=True)
 
