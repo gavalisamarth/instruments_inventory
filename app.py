@@ -167,9 +167,8 @@ st.markdown("""
 }
 
 /* ── Hide Streamlit chrome ── */
-#MainMenu, footer, header,
-[data-testid="stSidebar"],
-[data-testid="collapsedControl"] { display:none !important; }
+#MainMenu, footer { display:none !important; }
+header, [data-testid="stHeader"] { background: transparent !important; }
 
 /* ── Remove block padding ── */
 .main .block-container { padding:0 !important; margin:0 !important; max-width:100% !important; }
@@ -178,21 +177,17 @@ st.markdown("""
 /* ══════════════════════════════
    SIDEBAR COLUMN
 ══════════════════════════════ */
-[data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child {
+[data-testid="stSidebar"] {
     background: var(--sidebar) !important;
     border-right: 1px solid var(--border) !important;
     padding: 0 !important;
-    min-height: 100vh !important;
-    position: sticky !important;
-    top: 0 !important;
-    align-self: flex-start !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
+}
+[data-testid="stSidebarUserContent"] {
+    padding-top: 1rem !important;
 }
 
 /* ── All sidebar buttons base ── */
-[data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child
-.stButton > button {
+[data-testid="stSidebar"] .stButton > button {
     background: transparent !important;
     border: none !important;
     color: var(--text-2) !important;
@@ -206,15 +201,13 @@ st.markdown("""
     align-items: center !important;
     border-radius: 4px !important;
 }
-[data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child
-.stButton > button:hover {
+[data-testid="stSidebar"] .stButton > button:hover {
     background: rgba(0,180,216,0.06) !important;
     color: var(--text-1) !important;
     transform: none !important;
     box-shadow: none !important;
 }
-[data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child
-[data-testid="stVerticalBlock"] { gap:1px !important; padding:0 !important; }
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] { gap:1px !important; padding:0 !important; }
 
 /* ── NEW ISSUE button (teal CTA) ── */
 .new-issue-btn .stButton > button {
@@ -279,7 +272,7 @@ st.markdown("""
 .reload-btn .stButton > button:hover { color: var(--text-2) !important; }
 
 /* ── Sidebar divider ── */
-[data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child hr {
+[data-testid="stSidebar"] hr {
     border-color: var(--border) !important; margin: 8px 0 !important;
 }
 
@@ -316,11 +309,6 @@ st.markdown("""
 /* ══════════════════════════════
    CONTENT AREA
 ══════════════════════════════ */
-[data-testid="stHorizontalBlock"] > [data-testid="column"]:last-child {
-    padding: 0 !important;
-    min-height: 100vh !important;
-    background: var(--bg) !important;
-}
 .content-pad { padding: 24px 28px; }
 
 /* ══════════════════════════════
@@ -527,53 +515,7 @@ input:focus, textarea:focus { border-color: var(--teal) !important; }
 }
 
 hr { border-color: var(--border) !important; margin: 10px 0 !important; }
-/* ══════════════════════════════
-   MOBILE OPTIMIZATION
-══════════════════════════════ */
-@media (max-width: 768px) {
-    /* Stack sidebar naturally instead of 100vh sticky */
-    [data-testid="stHorizontalBlock"] { flex-direction: column !important; }
-    [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child {
-        position: relative !important;
-        height: auto !important;
-        min-height: 0 !important;
-        max-height: none !important;
-        width: 100% !important;
-        border-right: none !important;
-        border-bottom: 1px solid var(--border) !important;
-        padding-bottom: 15px !important;
-        display: flex !important;
-        flex-direction: column !important;
-    }
-    
-    /* Remove gaps and force compact buttons */
-    [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child [data-testid="stVerticalBlock"] {
-        gap: 4px !important;
-        height: auto !important;
-    }
-    
-    [data-testid="stHorizontalBlock"] > [data-testid="column"]:first-child .stButton > button {
-        width: 100% !important;
-    }
-    
-    /* Content padding and width */
-    [data-testid="stHorizontalBlock"] > [data-testid="column"]:last-child {
-        min-height: auto !important;
-        width: 100% !important;
-    }
-    .content-pad { padding: 16px 12px !important; }
-    
-    /* Stack KPI Cards */
-    .kpi-row { flex-direction: column !important; gap: 10px !important; }
-    
-    /* Make tables horizontally scrollable */
-    .tbl-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-    
-    /* Adjust top bar */
-    .top-bar { padding: 0 15px !important; }
-    .top-bar-title { font-size: 0.65rem !important; }
-    .top-bar-page { font-size: 0.65rem !important; }
-}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -590,12 +532,10 @@ NAV_ITEMS = [
     ("analytics",  "📈  Analytics"),
 ]
 
-sb, main = st.columns([1.6, 8.4], gap="small")
-
 # ════════════════════
 # SIDEBAR
 # ════════════════════
-with sb:
+with st.sidebar:
 
     # Brand — Adani Logo as styled text
     st.markdown("""
@@ -657,7 +597,7 @@ with sb:
 # ════════════════════
 # MAIN CONTENT
 # ════════════════════
-with main:
+with st.container():
 
     PAGE_LABELS = {
         "dashboard":  "DASHBOARD",
